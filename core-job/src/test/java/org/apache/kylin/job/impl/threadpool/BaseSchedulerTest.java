@@ -28,7 +28,7 @@ import org.apache.kylin.job.engine.JobEngineConfig;
 import org.apache.kylin.job.execution.AbstractExecutable;
 import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
-import org.apache.kylin.job.lock.MockJobLock;
+import org.apache.kylin.common.lock.MockJobLock;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;

@@ -18,7 +18,6 @@
 
 package org.apache.kylin.dict;
 
-import com.google.common.base.Preconditions;
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.BytesUtil;
 import org.slf4j.Logger;

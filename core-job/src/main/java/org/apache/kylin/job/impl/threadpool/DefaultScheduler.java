@@ -40,7 +40,7 @@ import org.apache.kylin.job.execution.Executable;
 import org.apache.kylin.job.execution.ExecutableManager;
 import org.apache.kylin.job.execution.ExecutableState;
 import org.apache.kylin.job.execution.Output;
-import org.apache.kylin.job.lock.JobLock;
+import org.apache.kylin.common.lock.JobLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -35,7 +35,6 @@ import org.apache.kylin.common.util.LocalFileMetadataTestCase;
 import org.apache.kylin.cube.model.CubeDesc;
 import org.apache.kylin.cube.model.DictionaryDesc;
 import org.apache.kylin.cube.model.validation.ValidateContext;
-import org.apache.kylin.dict.GlobalDictionaryBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +72,7 @@ public class DictionaryRuleTest extends LocalFileMetadataTestCase {
     @Test
     public void testBadDesc() throws IOException {
         testDictionaryDesc(ERROR_DUPLICATE_DICTIONARY_COLUMN, DictionaryDesc.create("ORDER_ID", null, "FakeBuilderClass"));
-        testDictionaryDesc(ERROR_DUPLICATE_DICTIONARY_COLUMN, DictionaryDesc.create("ORDER_ID", null, GlobalDictionaryBuilder.class.getName()));
+        testDictionaryDesc(ERROR_DUPLICATE_DICTIONARY_COLUMN, DictionaryDesc.create("ORDER_ID", null, DictionaryRule.GLOBAL_DICT_BUILDER_CLASS));
     }
 
     @Test
@@ -88,20 +87,17 @@ public class DictionaryRuleTest extends LocalFileMetadataTestCase {
 
     @Test
     public void testBadDesc4() throws IOException {
-        testDictionaryDesc(ERROR_TRANSITIVE_REUSE,
-                DictionaryDesc.create("lstg_site_id", "SELLER_ID", null),
-                DictionaryDesc.create("price", "lstg_site_id", null));
+        testDictionaryDesc(ERROR_TRANSITIVE_REUSE, DictionaryDesc.create("lstg_site_id", "SELLER_ID", null), DictionaryDesc.create("price", "lstg_site_id", null));
     }
 
     @Test
     public void testBadDesc5() throws IOException {
-        testDictionaryDesc(ERROR_GLOBAL_DICTIONNARY_ONLY_MEASURE,
-                DictionaryDesc.create("CATEG_LVL2_NAME", null, GlobalDictionaryBuilder.class.getName()));
+        testDictionaryDesc(ERROR_GLOBAL_DICTIONNARY_ONLY_MEASURE, DictionaryDesc.create("CATEG_LVL2_NAME", null, DictionaryRule.GLOBAL_DICT_BUILDER_CLASS));
     }
 
     @Test
     public void testGoodDesc2() throws IOException {
-        testDictionaryDesc(null, DictionaryDesc.create("SELLER_ID", null, GlobalDictionaryBuilder.class.getName()));
+        testDictionaryDesc(null, DictionaryDesc.create("SELLER_ID", null, DictionaryRule.GLOBAL_DICT_BUILDER_CLASS));
     }
 
     private void testDictionaryDesc(String expectMessage, DictionaryDesc... descs) throws IOException {

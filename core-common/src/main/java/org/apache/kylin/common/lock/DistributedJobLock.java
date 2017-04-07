@@ -16,21 +16,23 @@
  * limitations under the License.
  */
 
-package org.apache.kylin.job.lock;
+package org.apache.kylin.common.lock;
 
-import java.util.concurrent.ExecutorService;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+
+import java.util.concurrent.Executor;
 
 public interface DistributedJobLock extends JobLock {
-    
-    boolean lockWithName(String name, String serverName);
 
-    boolean isHasLocked(String segmentId);
+    boolean lockWithClient(String lockPath, String lockClient);
 
-    void unlockWithName(String name);
+    boolean isHasLocked(String lockPath);
 
-    void watchLock(ExecutorService pool, DoWatchLock doWatch);
-    
-    public interface DoWatchLock {
-        void doWatch(String path, String data);
+    void unlock(String lockPath);
+
+    PathChildrenCache watch(String watchPath, Executor watchExecutor, WatcherProcess process);
+
+    public interface WatcherProcess {
+        void process(String path, String data);
     }
 }

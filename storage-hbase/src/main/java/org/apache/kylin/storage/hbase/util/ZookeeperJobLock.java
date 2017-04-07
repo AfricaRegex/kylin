@@ -35,7 +35,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.kylin.common.KylinConfig;
-import org.apache.kylin.job.lock.JobLock;
+import org.apache.kylin.common.lock.JobLock;
 import org.apache.kylin.storage.hbase.HBaseConnection;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;

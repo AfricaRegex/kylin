@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.kylin.job.lock;
+package org.apache.kylin.common.lock;
 
 /**
  */
