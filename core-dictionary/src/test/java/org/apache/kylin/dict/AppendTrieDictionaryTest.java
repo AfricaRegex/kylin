@@ -22,7 +22,6 @@ import static org.apache.kylin.dict.GlobalDictHDFSStore.V2_INDEX_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
@@ -44,8 +43,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -58,18 +55,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class AppendTrieDictionaryTest extends LocalFileMetadataTestCase {
-
-    private static final UUID uuid = UUID.randomUUID();
-    private static final String RESOURCE_DIR = "/dict/append_dict_test/" + uuid;
-    private static final String HDFS_DIR = "file:///tmp/kylin_append_dict";
+    private static final String RESOURCE_DIR = "/dict/append_dict_test/" + UUID.randomUUID();
     private static String BASE_DIR;
-    private static String LOCAL_BASE_DIR =  "/tmp/kylin_append_dict/kylin_metadata/resources/GlobalDict" + RESOURCE_DIR + "/";
+    private static String LOCAL_BASE_DIR = "/tmp/kylin/kylin_metadata/resources/GlobalDict" + RESOURCE_DIR + "/";
 
     @Before
     public void beforeTest() {
         staticCreateTestMetadata();
         KylinConfig.getInstanceFromEnv().setProperty("kylin.dictionary.append-entry-size", "50000");
-        KylinConfig.getInstanceFromEnv().setProperty("kylin.env.hdfs-working-dir", HDFS_DIR);
         BASE_DIR = KylinConfig.getInstanceFromEnv().getHdfsWorkingDirectory() + "/resources/GlobalDict" + RESOURCE_DIR + "/";
     }
 
@@ -80,7 +73,7 @@ public class AppendTrieDictionaryTest extends LocalFileMetadataTestCase {
     }
 
     private void cleanup() {
-        Path basePath = new Path(HDFS_DIR);
+        Path basePath = new Path(BASE_DIR);
         try {
             HadoopUtil.getFileSystem(basePath).delete(basePath, true);
         } catch (IOException e) {
@@ -316,69 +309,6 @@ public class AppendTrieDictionaryTest extends LocalFileMetadataTestCase {
         }
         AppendTrieDictionary dictionary = builder.build(0);
         dictionary.getMaxId();
-    }
-
-    private class SharedBuilderThread extends Thread {
-        CountDownLatch startLatch;
-        CountDownLatch finishLatch;
-        String prefix;
-        int count;
-
-        SharedBuilderThread(CountDownLatch startLatch, CountDownLatch finishLatch, String prefix, int count) {
-            this.startLatch = startLatch;
-            this.finishLatch = finishLatch;
-            this.prefix = prefix;
-            this.count = count;
-        }
-
-        @Override
-        public void run() {
-            try {
-                AppendTrieDictionaryBuilder builder = createBuilder(RESOURCE_DIR);
-                startLatch.countDown();
-                for (int i = 0; i < count; i++) {
-                    builder.addValue(prefix + i);
-                }
-                builder.build(0);
-                finishLatch.countDown();
-            } catch (IOException e) {
-            }
-        }
-    }
-
-    @Ignore
-    @Test
-    public void testSharedBuilder() throws IOException, InterruptedException {
-        final CountDownLatch startLatch = new CountDownLatch(3);
-        final CountDownLatch finishLatch = new CountDownLatch(3);
-
-        AppendTrieDictionaryBuilder builder = createBuilder(RESOURCE_DIR);
-        Thread t1 = new SharedBuilderThread(startLatch, finishLatch, "t1_", 10000);
-        Thread t2 = new SharedBuilderThread(startLatch, finishLatch, "t2_", 10);
-        Thread t3 = new SharedBuilderThread(startLatch, finishLatch, "t3_", 100000);
-        t1.start();
-        t2.start();
-        t3.start();
-        startLatch.await();
-        AppendTrieDictionary dict = builder.build(0);
-        assertTrue("AppendDictBuilder Thread too slow", finishLatch.await(3000, TimeUnit.MILLISECONDS));
-        assertEquals(110010, dict.getMaxId());
-
-        builder = createBuilder(RESOURCE_DIR);
-        builder.addValue("success");
-        builder.addValue("s");
-        dict = builder.build(0);
-        for (int i = 0; i < 10000; i++) {
-            assertNotEquals(-1, dict.getIdFromValue("t1_" + i));
-        }
-        for (int i = 0; i < 10; i++) {
-            assertNotEquals(-1, dict.getIdFromValue("t2_" + i));
-        }
-        for (int i = 0; i < 100000; i++) {
-            assertNotEquals(-1, dict.getIdFromValue("t3_" + i));
-        }
-        assertEquals(110011, dict.getIdFromValue("success"));
-        assertEquals(110012, dict.getIdFromValue("s"));
     }
 
     @Test

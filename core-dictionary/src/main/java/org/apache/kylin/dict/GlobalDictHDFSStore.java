@@ -175,18 +175,16 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
     }
 
     @Override
-    DictSlice readSlice(String directory, String sliceFileName) {
+    DictSlice readSlice(String directory, String sliceFileName) throws IOException {
         Path path = new Path(directory, sliceFileName);
         logger.info("read slice from {}", path);
         try (FSDataInputStream input = fileSystem.open(path, BUFFER_SIZE)) {
             return DictSlice.deserializeFrom(input);
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("read slice %s failed", path), e);
         }
     }
 
     @Override
-    String writeSlice(String workingDir, DictSliceKey key, DictNode slice) {
+    String writeSlice(String workingDir, DictSliceKey key, DictNode slice) throws IOException {
         //write new slice
         String sliceFile = IndexFormatV2.sliceFileName(key);
         Path path = new Path(workingDir, sliceFile);
@@ -195,22 +193,16 @@ public class GlobalDictHDFSStore extends GlobalDictStore {
         try (FSDataOutputStream out = fileSystem.create(path, true, BUFFER_SIZE)) {
             byte[] bytes = slice.buildTrieBytes();
             out.write(bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("write slice with key %s into file %s failed", key, path), e);
         }
         return sliceFile;
     }
 
     @Override
-    void deleteSlice(String workingDir, String sliceFileName) {
+    void deleteSlice(String workingDir, String sliceFileName) throws IOException {
         Path path = new Path(workingDir, sliceFileName);
         logger.info("delete slice at {}", path);
-        try {
-            if (fileSystem.exists(path)) {
-                fileSystem.delete(path, false);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("delete slice at %s failed", path), e);
+        if (fileSystem.exists(path)) {
+            fileSystem.delete(path, false);
         }
     }
 

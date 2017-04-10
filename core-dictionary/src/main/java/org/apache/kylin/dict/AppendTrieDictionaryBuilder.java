@@ -20,8 +20,6 @@ package org.apache.kylin.dict;
 
 import org.apache.kylin.common.KylinConfig;
 import org.apache.kylin.common.util.BytesUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,7 +28,6 @@ import java.util.TreeMap;
 import static com.google.common.base.Preconditions.checkState;
 
 public class AppendTrieDictionaryBuilder {
-    private static final Logger logger = LoggerFactory.getLogger(AppendTrieDictionaryBuilder.class);
 
     private final String baseDir;
     private final String workingDir;
@@ -42,7 +39,6 @@ public class AppendTrieDictionaryBuilder {
     private int nValues;
     private BytesConverter bytesConverter;
     private TreeMap<DictSliceKey, String> sliceFileMap = new TreeMap<>(); // slice key -> slice file name
-    private int counter;
 
     private DictSliceKey curKey;
     private DictNode curNode;
@@ -77,11 +73,7 @@ public class AppendTrieDictionaryBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public void addValue(String value) {
-        if (counter++ > 0 && counter % 1_000_000 == 0) {
-            logger.info("processed {} values", counter);
-        }
-
+    public void addValue(String value) throws IOException {
         byte[] valueBytes = bytesConverter.convertToBytes(value);
 
         if (sliceFileMap.isEmpty()) {
@@ -134,7 +126,7 @@ public class AppendTrieDictionaryBuilder {
         return dict;
     }
 
-    private void flushCurrentNode() {
+    private void flushCurrentNode() throws IOException {
         String newSliceFile = store.writeSlice(workingDir, curKey, curNode);
         String oldSliceFile = sliceFileMap.put(curKey, newSliceFile);
         if (oldSliceFile != null) {

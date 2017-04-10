@@ -63,7 +63,7 @@ public abstract class GlobalDictStore {
      * @return a <i>DictSlice</i>
      * @throws IOException on I/O error
      */
-    abstract DictSlice readSlice(String workingDir, String sliceFileName);
+    abstract DictSlice readSlice(String workingDir, String sliceFileName) throws IOException;
 
     /**
      * Write a slice with the given key to the specified directory.
@@ -73,7 +73,7 @@ public abstract class GlobalDictStore {
      * @return file name of the new written slice
      * @throws IOException on I/O error
      */
-    abstract String writeSlice(String workingDir, DictSliceKey key, DictNode slice);
+    abstract String writeSlice(String workingDir, DictSliceKey key, DictNode slice) throws IOException;
 
     /**
      * Delete a slice with the specified file name.
@@ -81,7 +81,7 @@ public abstract class GlobalDictStore {
      * @param sliceFileName file name of the slice, should exist
      * @throws IOException on I/O error
      */
-    abstract void deleteSlice(String workingDir, String sliceFileName);
+    abstract void deleteSlice(String workingDir, String sliceFileName) throws IOException;
 
     /**
      * commit the <i>DictSlice</i> and <i>GlobalDictMetadata</i> in workingDir to new versionDir
